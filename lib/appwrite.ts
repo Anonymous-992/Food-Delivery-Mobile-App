@@ -72,23 +72,17 @@ export const signIn = async ({ email, password }: SignInParams) => {
 
 export const getCurrentUser = async () => {
   try {
-    const currentAccount = await account.get()
-    if (!currentAccount) throw new Error("No account found")
+    const currentAccount = await account.get();
 
     const currentUser = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
-      [Query.equal('accountId', currentAccount.$id)]
-    )
+      [Query.equal("accountId", currentAccount.$id)]
+    );
 
-    if (!currentUser.documents.length) {
-      throw new Error("User document not found")
-    }
-
-    return currentUser.documents[0]
-
-  } catch (e) {
-    console.error(e)
-    throw e
+    return currentUser.documents[0] ?? null;
+  } catch {
+    return null;
   }
-}
+};
+
