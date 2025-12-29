@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
-import { CustomButtonProps } from '@/type'
 import cn from "clsx"
+import { CustomButtonProps } from '@/type'
 
 const CustomButton = ({
 	onPress,
