@@ -7,6 +7,11 @@ export const appwriteConfig = {
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
   databaseId: "69512df20010abb2a1b2",
   userCollectionId: "user",
+  bucketId : "6953e7280023a0219c42",
+  categoriesCollectionId : "categories",
+  menuCollectionId : 'menu',
+  customizationCollectionId : "customizations",
+  menuCustomizationCollectionId : 'menu_customizations'
 }
 
 export const client = new Client()
