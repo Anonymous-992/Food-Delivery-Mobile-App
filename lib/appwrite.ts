@@ -1,4 +1,4 @@
-import { CreateUserParams, SignInParams } from "@/type"
+import { CreateUserParams, GetMenuParams, SignInParams } from "@/type"
 import { Account, Avatars, Client, Databases, ID, Query, Storage } from "react-native-appwrite"
 
 export const appwriteConfig = {
@@ -7,11 +7,11 @@ export const appwriteConfig = {
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
   databaseId: "69512df20010abb2a1b2",
   userCollectionId: "user",
-  bucketId : "6953e7280023a0219c42",
-  categoriesCollectionId : "categories",
-  menuCollectionId : 'menu',
-  customizationCollectionId : "customizations",
-  menuCustomizationCollectionId : 'menu_customizations'
+  bucketId: "6953e7280023a0219c42",
+  categoriesCollectionId: "categories",
+  menuCollectionId: "menu",
+  customizationCollectionId: "customizations",
+  menuCustomizationCollectionId: "menu_customizations",
 }
 
 export const client = new Client()
@@ -26,7 +26,6 @@ export const databases = new Databases(client)
 export const storage = new Storage(client)
 
 const avatars = new Avatars(client)
-
 
 export const createUser = async ({
   email,
@@ -77,20 +76,51 @@ export const signIn = async ({ email, password }: SignInParams) => {
   }
 }
 
-
 export const getCurrentUser = async () => {
   try {
-    const currentAccount = await account.get();
+    const currentAccount = await account.get()
 
     const currentUser = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       [Query.equal("accountId", currentAccount.$id)]
-    );
+    )
 
-    return currentUser.documents[0] ?? null;
+    return currentUser.documents[0] ?? null
   } catch {
-    return null;
+    return null
   }
-};
+}
 
+export const getMenu = async ({ category, query }: GetMenuParams) => {
+  try {
+    const queries: string[] = []
+
+    if (category) queries.push(Query.equal("categories", category))
+    if (query) queries.push(Query.search("name", query))
+
+    const menus = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.menuCollectionId,
+      queries
+    )
+
+    return menus.documents
+  } catch (e: any) {
+    throw new Error(e.message)
+  }
+}
+
+
+export const getCategories = async () => {
+  try {
+    const categories = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.categoriesCollectionId
+    )
+
+    return categories
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}
