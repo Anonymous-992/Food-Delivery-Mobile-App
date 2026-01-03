@@ -1,73 +1,92 @@
-import { View, Text, Button, Alert } from 'react-native'
-import React, { useState } from 'react'
-import { Link, router } from 'expo-router'
-import CustomInput from '@/components/CustomInput'
 import CustomButton from '@/components/CustomButton'
+import CustomInput from '@/components/CustomInput'
 import { signIn } from '@/lib/appwrite'
+import useAuthStore from '@/store/auth.store'
 import * as Sentry from '@sentry/react-native'
+import { Link, router } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { Alert, Text, View } from 'react-native'
 
 const SignIn = () => {
 
-		const [isSubmitting, setIsSubmitting] = useState(false)
-		const [form, setForm] = useState({email : '', password: ''})	
+	const { isAuthenticated, fetchAuthenticatedUser } = useAuthStore()
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [form, setForm] = useState({ email: '', password: '' })
 
-		const submit = async () => {
+	useEffect(() => {
+		if (isAuthenticated) {
+			router.replace('/')
+		}
+	}, [isAuthenticated])
 
-			const {email,password} = form
+	const submit = async () => {
 
-			if(!email || !password) return Alert.alert('Error', 'Please enter valid email or password')
+		const { email, password } = form
 
-			setIsSubmitting(true)
+		if (!email || !password) return Alert.alert('Error', 'Please enter valid email or password')
 
-			try{
-				
-				await signIn({email, password})
+		setIsSubmitting(true)
 
-				router.replace('/')
-			}catch(error : any){
-				Alert.alert('Error', error.message)
-				Sentry.captureEvent(error)
+		try {
+			await signIn({ email, password })
+			// Update auth state before redirecting
+			await fetchAuthenticatedUser()
+			router.replace('/(tabs)')
+		} catch (error: any) {
+			const errorMessage = error.message || '';
+			if (errorMessage.toLowerCase().includes('session is active')) {
+				// Session already active, update state and redirect
+				await fetchAuthenticatedUser()
+				router.replace('/(tabs)');
+				return;
 			}
+			Alert.alert('Error', errorMessage)
+			Sentry.captureEvent(error)
+		} finally {
+			setIsSubmitting(false)
+		}
 
 
-		}	
+	}
 
-	
-  return (
-	<View className=' gap-10 bg-white rounded-lg p-5 mt-5'>
-	  
 
-		<CustomInput 
-		   placeholder='Enter Your E-mail'
-		   value={form.email}
-		   onChangeText={(text) => setForm((prev) => ({...prev, email : text}))}
-		   label='Email'
-		   keyboardType='email-address'
-		/>
+	return (
+		<>
+			<View className=' gap-10 bg-white rounded-lg p-5 mt-5'>
 
-		<CustomInput 
-		   placeholder='Enter Your Password'
-		   value={form.password}
-		   onChangeText={(text) => setForm((prev) => ({...prev, password : text}))}
-		   label='Password'
-		   secureTextEntry={true}
-		/>
 
-		<CustomButton 
-		title='Sign In'
-		isLoading={isSubmitting}
-		onPress={submit}
-		/>
+				<CustomInput
+					placeholder='Enter Your E-mail'
+					value={form.email}
+					onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
+					label='Email'
+					keyboardType='email-address'
+				/>
 
-		<View className=' flex mt-5 flex-row gap-2 justify-center'>
-			<Text className=' base-regular text-gray-100'>Don't have account?</Text>
-			<Link href="/sign-up" className=' base-bold text-primary'>
-				Sign Up
-			</Link>
-		</View>
+				<CustomInput
+					placeholder='Enter Your Password'
+					value={form.password}
+					onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
+					label='Password'
+					secureTextEntry={true}
+				/>
 
-	</View>
-  )
+				<CustomButton
+					title='Sign In'
+					isLoading={isSubmitting}
+					onPress={submit}
+				/>
+
+				<View className=' flex mt-5 flex-row gap-2 justify-center'>
+					<Text className=' base-regular text-gray-100'>Don't have account?</Text>
+					<Link href="/sign-up" className=' base-bold text-primary'>
+						Sign Up
+					</Link>
+				</View>
+
+			</View>
+		</>
+	)
 }
 
 export default SignIn

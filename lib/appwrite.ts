@@ -1,4 +1,4 @@
-import { CreateUserParams, GetMenuParams, SignInParams } from "@/type"
+import { CreateUserParams, GetMenuParams, SignInParams, User } from "@/type"
 import { Account, Avatars, Client, Databases, ID, Query, Storage } from "react-native-appwrite"
 
 export const appwriteConfig = {
@@ -135,5 +135,27 @@ export const getCategories = async () => {
     return categories.documents
   } catch (error: any) {
     throw new Error(error.message)
+  }
+}
+
+export const logout = async () => {
+  try {
+    await account.deleteSession("current");
+  } catch (e: any) {
+    throw new Error(e.message);
+  }
+}
+
+export const updateUser = async (userId: string, data: Partial<User>) => {
+  try {
+    const updatedUser = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId,
+      data
+    );
+    return updatedUser;
+  } catch (e: any) {
+    throw new Error(e.message);
   }
 }
