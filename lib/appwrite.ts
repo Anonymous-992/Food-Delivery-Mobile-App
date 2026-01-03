@@ -119,7 +119,7 @@ export const getCategories = async () => {
       appwriteConfig.categoriesCollectionId
     )
 
-    return categories
+    return categories.documents
   } catch (error: any) {
     throw new Error(error.message)
   }

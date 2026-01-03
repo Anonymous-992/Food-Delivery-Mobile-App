@@ -9,6 +9,8 @@ import CartButton from '@/components/CartButton'
 import cn from 'clsx'
 import MenuCard from '@/components/MenuCard'
 import { MenuItem } from '@/type'
+import SearchBar from '@/components/SearchBar'
+import Filter from '@/components/Filter'
 
 const Search = () => {
 
@@ -61,8 +63,8 @@ const Search = () => {
 				<CartButton />
 			</View>
 
-			<Text>Search Input</Text>
-			<Text>Filter</Text>
+			<SearchBar />
+			<Filter categories={categories!} />
 		</View>
 	  )}
 
